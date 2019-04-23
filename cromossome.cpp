@@ -64,3 +64,7 @@ bool Cromossome::isGeneForbidden(int u) {
     }
     return false;
 }
+
+bool Cromossome::hasGene(int u) {
+    return gene[u] ? true : false;
+}

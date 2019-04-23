@@ -1,5 +1,5 @@
-#ifndef CROMOSSOME_H_
-#define CROMOSSOME_H_
+#ifndef _CROMOSSOME_H_
+#define _CROMOSSOME_H_
 
 #include <vector>
 #include <functional>
@@ -29,6 +29,8 @@ class Cromossome {
         int getNForbidden();
 
         bool isGeneForbidden(int u);
+
+        bool hasGene(int u);
 };
 
-#endif /* CROMOSSOME_H_ */
+#endif /* _CROMOSSOME_H_ */
