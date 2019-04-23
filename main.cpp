@@ -15,6 +15,9 @@ vector<vector<int> > reversed_triples;
 
 Cromossome* best_solution;
 Population* population;
+Population* parents;
+Population* offspring;
+Population* mutants;
 
 int lFunction(int u, int pi_1, int pi_2) {
     return 1 + (pi_1 * u + pi_2) % n;
@@ -66,6 +69,16 @@ int getPopulationSize() {
     return size;
 }*/
 
+void updateBestSolution(Cromossome c) {
+    free(best_solution);
+    best_solution = new Cromossome(n);
+    for (int j = 0; j < n; j++) {
+        if (c.hasGene(j)) {
+            best_solution->add(j);
+        }
+    }
+}
+
 void setInitialPopulation(int population_size) {
     for (int i = 0; i < population_size; i++) {
         Cromossome c(n);
@@ -77,18 +90,78 @@ void setInitialPopulation(int population_size) {
         }
         population->addCromossome(c);
         if (c.getNForbidden() == 0 && c.getScore() > best_solution->getScore()) {
-            free(best_solution);
-            best_solution = new Cromossome(n);
-            for (int j = 0; j < n; j++) {
-                if (c.hasGene(j)) {
-                    best_solution->add(j);
-                }
-            }
+            updateBestSolution(c);
         }
     }
 }
 
+void selectParents(int population_size) {
+    parents = new Population();
+    int total = 0;
+    while (total < population_size) {
+        int a = rand() % population_size;
+        int b = rand() % population_size;
+
+        Cromossome parent1 = population->getCromossome(a);
+        Cromossome parent2 = population->getCromossome(b);
+        if (parent1.getScore() > parent2.getScore()) {
+            parents->addCromossome(parent1);
+        } else {
+            parents->addCromossome(parent2);
+        }
+        total++;
+    }
+}
+
+void crossover(int population_size) {
+    offspring = new Population();
+    for (int i = 0; i < population_size; i+=2) {
+        Cromossome parent1 = parents->getCromossome(i);
+        Cromossome parent2 = parents->getCromossome(i+1);
+
+        int crosspoint1 = rand() % n;
+        int crosspoint2 = rand() % (n - crosspoint1);
+
+        Cromossome child1(n);
+        Cromossome child2(n);
+        for (int j = 0; j < n; j++) {
+            if (j >= crosspoint1 && j < crosspoint2) {
+                if (parent1.hasGene(j)) child1.add(j);
+                if (parent2.hasGene(j)) child2.add(j);
+            } else {
+                if (parent2.hasGene(j)) child1.add(j);
+                if (parent1.hasGene(j)) child2.add(j);
+            }
+        }
+        offspring->addCromossome(child1);
+        offspring->addCromossome(child2);
+    }
+}
+
+void mutate(int population_size) {
+    mutants = new Population();
+    for (int i = 0; i < population_size; i++) {
+        Cromossome c = offspring->getCromossome(i);
+        Cromossome mutant(n);
+        for (int j = 0; j < n; j++) {
+            int r;
+            if (c.isGeneForbidden(j)) {
+                r = rand() % 2;
+            } else {
+                r = rand() % n;
+            }
+            int x = c.hasGene(j) ? 1 : 0;
+            if (r == 0) x = 1 - x;
+            if (x) {
+                mutant.add(j);
+            }
+        }
+        mutants->addCromossome(mutant);
+    }
+}
+
 int main(int argc, char** argv) {
+    int pop_size = 100;
     srand(0);
     for (int i = 0; i < argc; i++) {
         args.push_back(string(argv[i]));
@@ -112,15 +185,32 @@ int main(int argc, char** argv) {
             }
         }
         fin.close();
-        mountTriples();
-        best_solution = new Cromossome(n);
-        Cromossome* c = new Cromossome(n);
-        c->add(0);
-        cout << c->getScore() << endl;
-        c->sub(0);
-        cout << c->getScore() << endl;
-        setInitialPopulation(100);
-        cout << best_solution->getScore() << endl;
     }
+    mountTriples();
+    best_solution = new Cromossome(n);
+    setInitialPopulation(pop_size);
+    cout << best_solution->getScore() << endl;
+    int generation = 0;
+    while (generation < 1000) {
+        //cout << "generation: " << generation << endl;
+        selectParents(pop_size);
+        crossover(pop_size);
+        mutate(pop_size);
+
+        free(population);
+        population = new Population(); 
+        for (int i = 0; i < pop_size; i++) {
+            Cromossome c = mutants->getCromossome(i);
+            if (c.getNForbidden() == 0 && c.getScore() > best_solution->getScore()) {
+                updateBestSolution(c);
+            }
+            population->addCromossome(c);
+        }
+        free(parents);
+        free(offspring);
+        free(mutants);
+        generation++;
+    }
+    cout << best_solution->getScore() << endl;
     return 0;
 }
