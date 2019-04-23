@@ -68,3 +68,8 @@ bool Cromossome::isGeneForbidden(int u) {
 bool Cromossome::hasGene(int u) {
     return gene[u] ? true : false;
 }
+
+void Cromossome::reset() {
+    gene.clear();
+    acc.clear();
+}

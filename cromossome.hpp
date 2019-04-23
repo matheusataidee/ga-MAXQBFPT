@@ -31,6 +31,8 @@ class Cromossome {
         bool isGeneForbidden(int u);
 
         bool hasGene(int u);
+
+        void reset();
 };
 
 #endif /* _CROMOSSOME_H_ */

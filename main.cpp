@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include <time.h>
+#include <ctime>
 
 #include "cromossome.hpp"
 #include "population.hpp"
@@ -7,7 +7,6 @@
 using namespace std;
 
 int n;
-vector<string> args;
 
 vector<vector<double> > weights;
 vector<vector<int> > triples;
@@ -51,25 +50,8 @@ void mountTriples() {
     }
 }
 
-/*double exp(double num, int pot) {
-    if (pot == 0) return 1;
-    if (pot % 2 == 1) {
-        return exp(num, pot - 1) * num;
-    } else {
-        double half = exp(num, pot / 2);
-        return half * half;
-    }
-}
-
-int getPopulationSize() {
-    int size = 1;
-    while (exp(1 - (exp(1/(double)2, size - 1)), n) < (double)0.999999) {
-        size++;
-    }
-    return size;
-}*/
-
 void updateBestSolution(Cromossome c) {
+    best_solution->reset();
     free(best_solution);
     best_solution = new Cromossome(n);
     for (int j = 0; j < n; j++) {
@@ -138,7 +120,7 @@ void crossover(int population_size) {
     }
 }
 
-void mutate(int population_size) {
+void mutate(int population_size, double fac) {
     mutants = new Population();
     for (int i = 0; i < population_size; i++) {
         Cromossome c = offspring->getCromossome(i);
@@ -146,9 +128,9 @@ void mutate(int population_size) {
         for (int j = 0; j < n; j++) {
             int r;
             if (c.isGeneForbidden(j)) {
-                r = rand() % 2;
+                r = rand() % 3;
             } else {
-                r = rand() % n;
+                r = rand() % (int)((double)n / fac);
             }
             int x = c.hasGene(j) ? 1 : 0;
             if (r == 0) x = 1 - x;
@@ -160,57 +142,103 @@ void mutate(int population_size) {
     }
 }
 
-int main(int argc, char** argv) {
-    int pop_size = 100;
-    srand(0);
-    for (int i = 0; i < argc; i++) {
-        args.push_back(string(argv[i]));
+void reset() {
+    vector<vector<double> > weights;
+    vector<vector<int> > triples;
+    vector<vector<int> > reversed_triples;
+    for (int i = 0; i < weights.size(); i++) {
+        weights[i].clear();
     }
-    if (argc < 2) {
-        cout << "Usage: " << args[0] << " <instance>" << endl;
-        return 1;
-    } else {
-        ifstream fin(argv[1]);
-        fin >> n;
-        weights = vector<vector<double> >(n, vector<double>(n, 0.0));
-        triples = vector<vector<int> >(n, vector<int>(3, 0));
-        reversed_triples = vector<vector<int> >(n);
-        population = new Population();
-        for (int i = 0; i < n; i++) {
-            for (int j = i; j < n; j++) {
-                fin >> weights[i][j];
-                if (j > i) {
-                    weights[j][i] = 0.0;
+    weights.clear();
+    for (int i = 0; i < triples.size(); i++) {
+        triples[i].clear();
+    }
+    triples.clear();
+    for (int i = 0; i < reversed_triples.size(); i++) {
+        reversed_triples[i].clear();
+    }
+    reversed_triples.clear();
+}
+
+int main(int argc, char** argv) {
+    string instances[7] = {".\\instances\\qbf020", ".\\instances\\qbf040", ".\\instances\\qbf060", 
+                            ".\\instances\\qbf080", ".\\instances\\qbf100", ".\\instances\\qbf200", ".\\instances\\qbf400", };
+    int pop_sizes[3] = {100, 150, 100};
+    double mutation_rate[3] = {1.0, 1.0, 2.0};
+    for (int k = 0; k < 3; k++) {
+        for (int s = 0; s < 7; s++) {
+            int pop_size = pop_sizes[k];
+            srand(0);
+            ifstream fin(instances[s].c_str());
+            fin >> n;
+            weights = vector<vector<double> >(n, vector<double>(n, 0.0));
+            triples = vector<vector<int> >(n, vector<int>(3, 0));
+            reversed_triples = vector<vector<int> >(n);
+            population = new Population();
+            for (int i = 0; i < n; i++) {
+                for (int j = i; j < n; j++) {
+                    fin >> weights[i][j];
+                    if (j > i) {
+                        weights[j][i] = 0.0;
+                    }
                 }
             }
-        }
-        fin.close();
-    }
-    mountTriples();
-    best_solution = new Cromossome(n);
-    setInitialPopulation(pop_size);
-    cout << best_solution->getScore() << endl;
-    int generation = 0;
-    while (generation < 1000) {
-        //cout << "generation: " << generation << endl;
-        selectParents(pop_size);
-        crossover(pop_size);
-        mutate(pop_size);
+            fin.close();
+            mountTriples();
+            best_solution = new Cromossome(n);
+            setInitialPopulation(pop_size);
+            int generation = 0, best_gen = 0;
+            cout << "Instance: " << instances[s] << "\tPopulation size: " << pop_size 
+                    << "\tMutation rate: " << mutation_rate[k] << "\tMethod: Default" << endl;
 
-        free(population);
-        population = new Population(); 
-        for (int i = 0; i < pop_size; i++) {
-            Cromossome c = mutants->getCromossome(i);
-            if (c.getNForbidden() == 0 && c.getScore() > best_solution->getScore()) {
-                updateBestSolution(c);
+            std::clock_t start;
+            double duration;
+
+            start = std::clock();
+
+
+            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+
+
+            while ((( std::clock() - start ) / (double) CLOCKS_PER_SEC) < 1800) {
+                //cout << "generation: " << generation << endl;
+                selectParents(pop_size);
+                crossover(pop_size);
+                mutate(pop_size, mutation_rate[k]);
+
+                population->reset();
+                free(population);
+                population = new Population(); 
+                for (int i = 0; i < pop_size; i++) {
+                    Cromossome c = mutants->getCromossome(i);
+                    if (c.getNForbidden() == 0 && c.getScore() > best_solution->getScore()) {
+                        updateBestSolution(c);
+                        best_gen = generation;
+                    }
+                    population->addCromossome(c);
+                }
+                parents->reset();
+                offspring->reset();
+                mutants->reset();
+                free(parents);
+                free(offspring);
+                free(mutants);
+                generation++;
             }
-            population->addCromossome(c);
+            cout << best_solution->getScore() << endl;
+            for (int i = 0; i < n; i++) {
+                if (best_solution->hasGene(i)) {
+                    cout << i << " ";
+                }
+            }
+            cout << endl;
+            cout << "Best gen: " << best_gen << "\tTotal Number of generations: " << generation << endl << endl;
+            best_solution->reset();
+            free(best_solution);
+            population->reset();
+            free(population);
+            reset();
         }
-        free(parents);
-        free(offspring);
-        free(mutants);
-        generation++;
     }
-    cout << best_solution->getScore() << endl;
     return 0;
 }
