@@ -1,12 +1,15 @@
 #include <bits/stdc++.h>
 
+#include "cromossome.hpp"
+
 using namespace std;
 
 int n;
-vector<string> args;
 vector<vector<double> > weights;
 vector<vector<int> > triples;
 vector<vector<int> > reversed_triples;
+
+vector<string> args;
 
 int lFunction(int u, int pi_1, int pi_2) {
     return 1 + (pi_1 * u + pi_2) % n;
@@ -37,15 +40,6 @@ void mountTriples() {
             triples[i][j]--;
             reversed_triples[triples[i][j]].push_back(i);
         }
-        
-        cout << triples[i][0] << " " << triples[i][1] << " " << triples[i][2] << endl;
-    }
-    cout << endl;
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < reversed_triples[i].size(); j++) {
-            cout << reversed_triples[i][j] << " ";
-        }
-        cout << endl;
     }
 }
 
@@ -65,9 +59,17 @@ int main(int argc, char** argv) {
         for (int i = 0; i < n; i++) {
             for (int j = i; j < n; j++) {
                 fin >> weights[i][j];
+                if (j > i) {
+                    weights[j][i] = 0.0;
+                }
             }
         }
         mountTriples();
+        Cromossome* c = new Cromossome(n);
+        c->add(0);
+        cout << c->getScore() << endl;
+        c->sub(0);
+        cout << c->getScore() << endl;
     }
     return 0;
 }
