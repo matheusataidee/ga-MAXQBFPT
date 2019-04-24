@@ -1,0 +1,35 @@
+Instance: .\instances\qbf020    Population size: 100    Mutation rate: 2        Method: Default
+125
+2 3 4 9 11 14 15 16 19
+Best gen: 362   Total Number of generations: 11234
+
+Instance: .\instances\qbf040    Population size: 100    Mutation rate: 2        Method: Default
+319
+0 1 2 4 7 9 11 14 15 18 21 22 23 24 31 32 34 36
+Best gen: 11067 Total Number of generations: 11234
+
+Instance: .\instances\qbf060    Population size: 100    Mutation rate: 2        Method: Default
+448
+2 3 4 14 17 22 24 26 27 29 30 32 34 35 38 42 44 45 49 51 53 55 56 59
+Best gen: 8897  Total Number of generations: 11234
+
+Instance: .\instances\qbf080    Population size: 100    Mutation rate: 2        Method: Default
+693
+1 2 3 4 7 8 11 12 13 15 18 22 24 31 35 36 37 42 44 47 49 50 51 54 55 57 60 61 69 71 73 74 75
+Best gen: 5562  Total Number of generations: 11234
+
+Instance: .\instances\qbf100    Population size: 100    Mutation rate: 2        Method: Default
+1024
+2 7 10 14 15 16 17 18 22 23 25 28 29 31 33 34 38 39 42 44 47 50 51 56 59 62 63 64 66 69 71 72 73 74 78 80 90 91 95 96
+Best gen: 1169  Total Number of generations: 11234
+
+Instance: .\instances\qbf200    Population size: 100    Mutation rate: 2        Method: Default
+3083
+4 5 6 7 9 16 19 21 25 28 30 31 34 39 41 43 45 46 49 51 54 56 61 63 66 67 69 70 72 73 80 81 83 85 86 87 89 94 99 100 103 104 106 107 111 116 119 121 123 124 125 126 130 131 137 138 140 141 143 145 147 148 151 153 154 155 156 157 158 160 162 164 166 167 169 170 171 174 179 180 181 185 195 199
+Best gen: 4461  Total Number of generations: 11234
+
+Instance: .\instances\qbf400    Population size: 100    Mutation rate: 2        Method: Default
+8606
+1 2 7 9 10 11 15 16 17 18 21 23 24 25 30 34 43 47 48 50 51 52 53 54 57 61 62 65 66 67 70 73 80 84 85 86 87 91 92 93 95 97 99 100 101 102 104 107 108
+111 114 117 119 121 122 124 125 127 130 134 139 140 141 145 146 147 148 151 152 154 155 156 158 159 160 162 165 166 168 172 174 177 179 190 192 193 195 197 205 211 212 224 226 227 229 230 231 232 234 235 236 237 244 245 246 247 248 250 251 258 259 263 265 272 273 274 277 284 285 288 289 290 291 293 294 296 300 303 304 306 312 316 323 327 328 332 333 335 339 341 342 351 352 354 358 366 369 371 372 373 376 377 380 381 382 383 384 385 386 390 393 397 398
+Best gen: 2681  Total Number of generations: 10212
