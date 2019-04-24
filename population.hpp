@@ -16,6 +16,8 @@ public:
 
     int getIdBest();
 
+    void removeWorst();
+
     void reset();
 };
 

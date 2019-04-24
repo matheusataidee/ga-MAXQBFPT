@@ -77,10 +77,10 @@ void setInitialPopulation(int population_size) {
     }
 }
 
-void selectParents(int population_size) {
+void selectParents(int population_size, int steady_step) {
     parents = new Population();
     int total = 0;
-    while (total < population_size) {
+    while (total < steady_step) {
         int a = rand() % population_size;
         int b = rand() % population_size;
 
@@ -120,6 +120,41 @@ void crossover(int population_size) {
     }
 }
 
+void crossoverForDiversity(int population_size) {
+    offspring = new Population();
+    for (int i = 0; i < population_size; i+=2) {
+        Cromossome parent1 = parents->getCromossome(i);
+        Cromossome parent2 = parents->getCromossome(i+1);
+
+        int it = 0;
+        bool is_same = true;
+        int crosspoint1;
+        int crosspoint2;
+        while (it++ < 5 && is_same) {
+            crosspoint1 = rand() % n;
+            crosspoint2 = rand() % (n - crosspoint1);
+            for (int j = crosspoint1; is_same && j < crosspoint2; j++) {
+                if (parent1.hasGene(j) != parent2.hasGene(j)) 
+                    is_same = false;
+            }
+        }
+
+        Cromossome child1(n);
+        Cromossome child2(n);
+        for (int j = 0; j < n; j++) {
+            if (j >= crosspoint1 && j < crosspoint2) {
+                if (parent1.hasGene(j)) child1.add(j);
+                if (parent2.hasGene(j)) child2.add(j);
+            } else {
+                if (parent2.hasGene(j)) child1.add(j);
+                if (parent1.hasGene(j)) child2.add(j);
+            }
+        }
+        offspring->addCromossome(child1);
+        offspring->addCromossome(child2);
+    }
+}
+
 void mutate(int population_size, double fac) {
     mutants = new Population();
     for (int i = 0; i < population_size; i++) {
@@ -140,6 +175,14 @@ void mutate(int population_size, double fac) {
         }
         mutants->addCromossome(mutant);
     }
+}
+
+void fixSteadyState(int population_size) {
+    for (int i = 0; i < population_size; i++) {
+        mutants->addCromossome(population->getCromossome(i));
+    }
+    mutants->removeWorst();
+    mutants->removeWorst();
 }
 
 void reset() {
@@ -163,9 +206,10 @@ void reset() {
 int main(int argc, char** argv) {
     string instances[7] = {".\\instances\\qbf020", ".\\instances\\qbf040", ".\\instances\\qbf060", 
                             ".\\instances\\qbf080", ".\\instances\\qbf100", ".\\instances\\qbf200", ".\\instances\\qbf400", };
-    int pop_sizes[3] = {100, 150, 100};
-    double mutation_rate[3] = {1.0, 1.0, 2.0};
-    for (int k = 0; k < 3; k++) {
+    string method = "Default";
+    int pop_sizes[1] = {100};
+    double mutation_rate[1] = {1.0};
+    for (int k = 0; k < 1; k++) {
         for (int s = 0; s < 7; s++) {
             int pop_size = pop_sizes[k];
             srand(0);
@@ -189,7 +233,7 @@ int main(int argc, char** argv) {
             setInitialPopulation(pop_size);
             int generation = 0, best_gen = 0;
             cout << "Instance: " << instances[s] << "\tPopulation size: " << pop_size 
-                    << "\tMutation rate: " << mutation_rate[k] << "\tMethod: Default" << endl;
+                    << "\tMutation rate: " << mutation_rate[k] << "\tMethod: " << method  << endl;
 
             std::clock_t start;
             double duration;
@@ -200,11 +244,22 @@ int main(int argc, char** argv) {
             duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
 
-            while ((( std::clock() - start ) / (double) CLOCKS_PER_SEC) < 1800) {
+            while (generation < 11234 && (( std::clock() - start ) / (double) CLOCKS_PER_SEC) < 1800) {
                 //cout << "generation: " << generation << endl;
-                selectParents(pop_size);
-                crossover(pop_size);
-                mutate(pop_size, mutation_rate[k]);
+                if (method == "Steady-state") {
+                    selectParents(pop_size, 2);
+                    crossover(2);
+                    mutate(2, mutation_rate[k]);
+                    fixSteadyState(pop_size);
+                } else if (method == "Diversity") {
+                    selectParents(pop_size, pop_size);
+                    crossoverForDiversity(pop_size);
+                    mutate(pop_size, mutation_rate[k]);
+                } else {
+                    selectParents(pop_size, pop_size);
+                    crossover(pop_size);
+                    mutate(pop_size, mutation_rate[k]);
+                }
 
                 population->reset();
                 free(population);
